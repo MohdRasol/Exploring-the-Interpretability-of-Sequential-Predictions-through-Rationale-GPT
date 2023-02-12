@@ -2,7 +2,9 @@
 # Exploring the Interpretability of Sequential Predictions through Rationale GPT                                                                                                               #
 # Reproducing and updated version of Rationales for Sequential Predictions by Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)](https://aclanthology.org/2021.emnlp-main.807/)#
 # This Code is updated by Mohammed Rasol Al Saidat Feb 2023 22001106@student.buid.ac.ae                                                                                                        #
-# The Project is Uploaded on : https://drive.google.com/drive/folders/1gXHY0sCpGDpUJ0pmhX3b3Wc1Z_-pXPrw?usp=sharing                                                                            #
+# The Project is Uploaded on : https://drive.google.com/drive/folders/1gXHY0sCpGDpUJ0pmhX3b3Wc1Z_-pXPrw?usp=sharing  
+# You Can run the Code on : https://colab.research.google.com/drive/1S_IJzTd8xk0R-RkqLPDLo8do7fNK-s2u#scrollTo=zepFE77lGzRR
+
 ################################################################################################################################################################################################
 
 
