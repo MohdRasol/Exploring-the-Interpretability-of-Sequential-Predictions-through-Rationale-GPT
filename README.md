@@ -790,7 +790,7 @@ This should produce the following results:
 Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 2 of the paper are a little different.
 
 ## Quick Run
-Check out our [Colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw), which generates a sequence with GPT-2 and performs greedy rationalization. Our compatible version of GPT-2 is [available on Hugging Face](https://huggingface.co/keyonvafa/compatible-gpt2).
+Check out our [Colab notebook](https://colab.research.google.com/drive/1S_IJzTd8xk0R-RkqLPDLo8do7fNK-s2u#scrollTo=zepFE77lGzRR), which generates a sequence with GPT-2 and performs greedy rationalization. Our compatible version of GPT-2 is [available on Hugging Face](https://huggingface.co/keyonvafa/compatible-gpt2).
 
 <p align="center">
 <img src="https://github.com/keyonvafa/sequential-rationales/blob/main/analysis/figs/sequential_rationale_small.gif" --width="300" height="300" />
