@@ -793,7 +793,7 @@ Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in
 Check out our [Colab notebook](https://colab.research.google.com/drive/1S_IJzTd8xk0R-RkqLPDLo8do7fNK-s2u#scrollTo=zepFE77lGzRR), which generates a sequence with GPT-2 and performs greedy rationalization. Our compatible version of GPT-2 is [available on Hugging Face](https://huggingface.co/keyonvafa/compatible-gpt2).
 
 <p align="center">
-<img src="[https://github.com/MohdRasol/Exploring-the-Interpretability-of-Sequential-Predictions-through-Rationale-GPT/blob/main/Mohd%20Final%20Test.png]" --width="300" height="300" />
+<img src="[https://github.com/MohdRasol/Exploring-the-Interpretability-of-Sequential-Predictions-through-Rationale-GPT/blob/main/Mohd%20Final%20Test.png]" />
 </p>
 
 
