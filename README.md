@@ -8,6 +8,7 @@
 ##############
 #Requirements#
 ##############
+
 Python 3.x
 PyTorch 1.x
 NumPy
@@ -17,6 +18,7 @@ Matplotlib
 #######
 #Usage#
 #######
+
 To train the model with default settings, run:
 
 python train.py
@@ -34,11 +36,13 @@ This will output the accuracy of the model on the test set.
 #################
 #Code Structure #
 #################
+
 The main code is located in the model.py, train.py, and test.py files. The data.py file contains the code for loading and preprocessing the dataset. The utils.py file contains utility functions for saving and loading models, and computing accuracy.
 
 #################
 #Best Practices #
 #################
+
 Use virtual environments to isolate dependencies.
 Use command line arguments or configuration files to specify hyperparameters.
 Save the best model based on validation accuracy, rather than training accuracy.
@@ -709,7 +713,7 @@ python examples/pytorch/language-modeling/run_clm.py \
 ```
 This should give a heldout perplexity of 17.6086.
 
-For the pretrained model:
+# For the pretrained model:
 ```{bash}
 python examples/pytorch/language-modeling/run_clm.py \
     --model_name_or_path gpt2-medium \
@@ -721,121 +725,94 @@ python examples/pytorch/language-modeling/run_clm.py \
 ```
 This should give a heldout perplexity of 19.9674.
 
-#### Plot "the" repeats to check compatibility
-This will reproduce Figure 4 of the paper.
-```{bash}
-cd ../analysis
-python plot_gpt2_the_repeats.py  --checkpoint_dir $CHECKPOINT_DIR
-cd ../huggingface
-```
+import torch
+from models import SequentialModel
+from data_loader import DataLoader
+from train import train
+from evaluate import evaluate
 
-#### Plot page 1 figure
-This will reproduce Figure 1 of the paper. Alternatively, you can use our [Colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw) to reproduce Figure 1.
-```{bash}
-python plot_gpt2_rationalization.py  --checkpoint_dir $CHECKPOINT_DIR
-```
+# Define the model configurations to test
+model_configs = [
+    {'num_layers': 1, 'hidden_size': 64, 'learning_rate': 0.01, 'optimizer': 'sgd', 'reg_lambda': 0.001},
+    {'num_layers': 2, 'hidden_size': 64, 'learning_rate': 0.01, 'optimizer': 'sgd', 'reg_lambda': 0.001},
+    {'num_layers': 2, 'hidden_size': 128, 'learning_rate': 0.01, 'optimizer': 'sgd', 'reg_lambda': 0.001},
+    {'num_layers': 2, 'hidden_size': 128, 'learning_rate': 0.001, 'optimizer': 'sgd', 'reg_lambda': 0.001},
+    {'num_layers': 3, 'hidden_size': 128, 'learning_rate': 0.001, 'optimizer': 'adam', 'reg_lambda': 0.001},
+    {'num_layers': 3, 'hidden_size': 256, 'learning_rate': 0.001, 'optimizer': 'adam', 'reg_lambda': 0.001},
+    {'num_layers': 4, 'hidden_size': 256, 'learning_rate': 0.001, 'optimizer': 'adam', 'reg_lambda': 0.0001}
+]
 
-#### Greedy rationalize analogies
-For the analogies experiment, we use the [analogies dataset](https://aclweb.org/aclwiki/Google_analogy_test_set_(State_of_the_art)) provided by [Mikolev et al](https://arxiv.org/abs/1301.3781). The dataset is already included in our Github, so there is no need to download anything else.
-```{bash}
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method greedy 
-```
+# Define the dataset path
+dataset_path = '/path/to/dataset/'
 
-#### Greedy rationalize baselines (along with exhaustive search)
-```{bash}
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method gradient_norm
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method signed_gradient
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method integrated_gradient
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method attention_rollout
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method all_attention
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method last_attention
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method exhaustive
-```
+# Define the number of epochs and batch size for training and testing
+num_epochs = 10
+batch_size = 32
 
-#### Evaluate rationales for analogies experiment
-```{bash}
-cd ../analysis
-python evaluate_analogies_rationales.py --baseline gradient_norm
-python evaluate_analogies_rationales.py --baseline signed_gradient
-python evaluate_analogies_rationales.py --baseline integrated_gradient
-python evaluate_analogies_rationales.py --baseline attention_rollout
-python evaluate_analogies_rationales.py --baseline last_attention
-python evaluate_analogies_rationales.py --baseline all_attention
-cd ../huggingface
-```
-This should produce the following results:
+# Define the device to use for training and testing
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-|       Method       | Length | Ratio |  Ante  |  No D  |
-| ------------------ | ------ | ----- | ------ | ------ |
-| Gradient norms     |  14.9  |  2.7  |**1.00**|  0.22  |
-| Grad x emb         |  33.1  |  6.0  |  0.99  |  0.10  |
-| Integrated grads   |  31.9  |  6.0  |  0.99  |  0.04  |
-| Attention rollout  |  37.6  |  7.0  |**1.00**|  0.04  |
-| Last attention     |  14.9  |  2.7  |**1.00**|  0.31  |
-| All attentions     |  11.2  |  2.3  |  0.99  |  0.32  |
-| Greedy             | **7.8**|**1.1**|**1.00**|**0.63**|
+# Load the dataset
+data_loader = DataLoader(dataset_path)
+train_data, test_data = data_loader.load_data()
 
-Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 1 of the paper are a little different.
+# Test each model configuration and calculate the test accuracy
+for i, config in enumerate(model_configs):
+    print('Testing model configuration {}...'.format(i+1))
+    model = SequentialModel(config['num_layers'], config['hidden_size'], data_loader.num_classes(), config['reg_lambda'])
+    optimizer = torch.optim.SGD(model.parameters(), lr=config['learning_rate']) if config['optimizer'] == 'sgd' else torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
+    train(model, optimizer, train_data, num_epochs, batch_size, device)
+    test_accuracy = evaluate(model, test_data, batch_size, device)
+    print('Model Configuration: {}\tTest Accuracy: {:.2f}'.format(config, test_accuracy))
+  # The output will be
+  # Layers	Hidden Layer Size	Learning Rate	Optimizer	Regularization	Accuracy
 
-#### Get wall-clock time comparisons
-```{bash}
-python compare_rationalization_times.py  --checkpoint_dir $CHECKPOINT_DIR
-```
+![image](https://user-images.githubusercontent.com/59788704/224533960-dcb8492f-e697-4e4d-9fd6-f56785ed2a2e.png)
 
-#### Greedily rationalize Lambada
-For the final experiment, we collected an annotated version of the Lambada dataset. See more details about using the dataset [above](#annotated_lambada).
-```{bash}
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method greedy 
-```
+To calculate the fail rate and In Variance Test for each capability, you can use the evaluate_model() function in the rationale_net.py file from the Rationales-For-Sequential-Predictions project. This function takes a trained model, test dataset, and a list of capabilities as inputs and returns the accuracy and fail rate for each capability.
 
-#### Rationalize Lambada baselines
-```{bash}
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method gradient_norm
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method signed_gradient
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method integrated_gradient
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method attention_rollout
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method last_attention
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method all_attention 
-```
+For example, to get the accuracy and fail rate for Vocabulary and NER capabilities, you can use the following code:
 
-#### Evaluate rationales for Lambada
-```{bash}
-cd ../analysis
-python evaluate_lambada_rationales.py --baseline gradient_norm
-python evaluate_lambada_rationales.py --baseline signed_gradient
-python evaluate_lambada_rationales.py --baseline integrated_gradient
-python evaluate_lambada_rationales.py --baseline attention_rollout
-python evaluate_lambada_rationales.py --baseline last_attention
-python evaluate_lambada_rationales.py --baseline all_attention
-cd ../huggingface
-```
-This should produce the following results:
+from rationale_net import evaluate_model
+from data_loaders import load_and_cache_examples
 
-|       Method       | Length |  IOU   |   F1   |
-| ------------------ | ------ | ------ | ------ |
-| Gradient norms     |  53.4  |  0.17  |  0.25  |
-| Grad x emb         |  66.6  |  0.13  |  0.21  |
-| Integrated grads   |  67.0  |  0.12  |  0.21  |
-| Attention rollout  |  72.6  |  0.10  |  0.18  |
-| Last attention     |  53.0  |  0.16  |  0.25  | 
-| All attentions     |  51.3  |  0.19  |  0.26  | 
-| Greedy             |**18.9**|**0.25**|**0.34**| 
+test_dataset = load_and_cache_examples(...) # Load the test dataset
+model = ... # Load or train a model
 
-Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 2 of the paper are a little different.
+capabilities = ['Vocabulary', 'NER'] # List of capabilities to evaluate
+
+accuracy, fail_rate = evaluate_model(model, test_dataset, capabilities)
+
+print('Capability\tMin Func Test\tFail Rate\tIn Variance Test\tFail Rate')
+for i, capability in enumerate(capabilities):
+    print(capability + '\t' + str(accuracy[i]) + '\t' + str(fail_rate[i]))
+
+
+To calculate the In Variance Test and Negation capabilities, you can use the Checklist library. The Checklist library provides a set of predefined tests for different capabilities, including In Variance Test and Negation. You can use the test() function from the checklist.test_suite module to run these tests on your model and dataset.
+
+For example, to calculate the fail rate for In Variance Test and Negation capabilities, you can use the following code:
+from checklist.test_suite import TestSuite
+from checklist.editor import Editor
+from data_loaders import load_and_cache_examples
+import torch
+
+test_dataset = load_and_cache_examples(...) # Load the test dataset
+model = ... # Load or train a model
+
+# Define a set of test cases for In Variance Test and Negation capabilities
+suite = TestSuite()
+suite.add_test(Editor.InvarianceTest(test_dataset, model))
+suite.add_test(Editor.NegationTest(test_dataset, model))
+
+fail_rate = suite.fails()
+
+print('Capability\tIn Variance Test\tFail Rate\tNegation\tFail Rate')
+print('In Variance Test\t\t' + str(1 - fail_rate[0]) + '\t' + str(fail_rate[0]))
+print('Negation\t\t\t\t\t' + str(1 - fail_rate[1]) + '\t' + str(fail_rate[1]))
+
+# The Output will be:
+
+![image](https://user-images.githubusercontent.com/59788704/224534280-2fd4ec5b-9bcc-477a-9a79-c2fa63f958fc.png)
+
 
 
