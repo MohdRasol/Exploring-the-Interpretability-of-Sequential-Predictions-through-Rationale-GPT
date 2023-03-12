@@ -1,13 +1,14 @@
-##################################################################################
-# Exploring the Interpretability of Sequential Predictions through Rationale GPT #
-# Reproducing and updated version of Rationales for Sequential Predictions by    # 
-#Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)]              #
-# This Code is updated by Mohammed Rasol Al Saidat  22001106@student.buid.ac.ae  #
-##################################################################################
+###################################################################################
+# Exploring the Interpretability of Sequential Predictions through Rationale Model#
+# Reproducing and updated version of Rationales for Sequential Predictions by     # 
+#Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)]               #
+# This Code is updated by Mohammed Rasol Al Saidat  22001106@student.buid.ac.ae   #
+###################################################################################
 
 ##############
 #Requirements#
 ##############
+
 Python 3.x
 PyTorch 1.x
 NumPy
@@ -17,6 +18,7 @@ Matplotlib
 #######
 #Usage#
 #######
+
 To train the model with default settings, run:
 
 python train.py
