@@ -765,13 +765,7 @@ for i, config in enumerate(model_configs):
 #The output will be:
 
 Model Configuration	Test Accuracy
-1 layer, 64 hidden units, 0.01 learning rate, SGD optimizer, 0.001 regularization	0.85
-2 layers, 64 hidden units per layer, 0.01 learning rate, SGD optimizer, 0.001 regularization	0.88
-2 layers, 128 hidden units per layer, 0.01 learning rate, SGD optimizer, 0.001 regularization	0.89
-2 layers, 128 hidden units per layer, 0.001 learning rate, SGD optimizer, 0.001 regularization	0.91
-3 layers, 128 hidden units per layer, 0.001 learning rate, Adam optimizer, 0.001 regularization	0.92
-3 layers, 256 hidden units per layer, 0.001 learning rate, Adam optimizer, 0.001 regularization	0.93
-4 layers, 256 hidden units per layer, 0.001 learning rate, Adam optimizer, 0.0001 regularization	0.93
+
 ![image](https://user-images.githubusercontent.com/59788704/224533414-854584b8-741e-48f8-b12a-c8b48c37ad95.png)
 
 # Test Compatability
@@ -788,10 +782,7 @@ data = {
 df = pd.DataFrame(data)
 print(df)
 # The output will be:
-Capability	Min Func Test	Fail Rate	In Variance Test	Fail Rate
-Vocabulary	Word Choice	0.765	Word Order	0.697
-NER	Entity Presence	0.78	Entity Boundary	0.817
-Negation	Negation Words	0.513	Scoping and Intensity	0.712
+
 ![image](https://user-images.githubusercontent.com/59788704/224533469-cb954eec-f26a-49c8-8838-7e3c19b0a6e1.png)
 
 
