@@ -1,9 +1,9 @@
-##################################################################################
-# Exploring the Interpretability of Sequential Predictions through Rationale GPT #
-# Reproducing and updated version of Rationales for Sequential Predictions by    # 
-#Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)]              #
-# This Code is updated by Mohammed Rasol Al Saidat  22001106@student.buid.ac.ae  #
-##################################################################################
+############################################################################################
+# Exploring the Interpretability of Sequential Predictions through Rationale Model         #
+# This Code is updated by Mohammed Rasol Al Saidat  22001106@student.buid.ac.ae            #
+# as a reproducing and updated version of Rationales for Sequential Predictions code by    # 
+# Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)]                       #
+############################################################################################
 
 ##############
 #Requirements#
@@ -63,7 +63,7 @@ model.cuda()
 model.eval()
 
 # Generate sequence
-input_string = "The Supreme Court on Tuesday"
+input_string = "No God But Allah"
 input_ids = tokenizer(input_string, return_tensors='pt')['input_ids'].to(model.device)
 generated_input = model.generate(input_ids=input_ids, max_length=16, do_sample=False)[0]
   
@@ -90,9 +90,12 @@ print([text[sub_rationale[0]:sub_rationale[1]] for sub_rationale in rationale])
 
 ## Sequential Rationalization Code
 
-To rationalize your own sequence model, check out the instructions in the [Custom Model](#custom_model) section. To reproduce the experiments in our [paper](https://arxiv.org/abs/2109.06387), jump ahead to [Reproduce Experiments](#reproduce_experiments).
+You can test the code on Google Collab ( ready Made):
+https://colab.research.google.com/drive/1S_IJzTd8xk0R-RkqLPDLo8do7fNK-s2u?usp=sharing
 
-First, make sure all the required packages are installed:
+However, You can have the full visibility of the libraries and training model on:
+https://colab.research.google.com/drive/17OhQvdBnBPyiweYllFhqBbKT822HFXWO?usp=sharing
+
 
 ### Requirements and installation
 Configure a virtual environment using Python 3.6+ ([instructions here](https://docs.python.org/3.6/tutorial/venv.html)).
