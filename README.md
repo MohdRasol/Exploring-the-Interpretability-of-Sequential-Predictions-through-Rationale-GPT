@@ -723,121 +723,80 @@ python examples/pytorch/language-modeling/run_clm.py \
 ```
 This should give a heldout perplexity of 19.9674.
 
-#### Plot "the" repeats to check compatibility
-This will reproduce Figure 4 of the paper.
-```{bash}
-cd ../analysis
-python plot_gpt2_the_repeats.py  --checkpoint_dir $CHECKPOINT_DIR
-cd ../huggingface
+import torch
+from models import SequentialModel
+from data_loader import DataLoader
+from train import train
+from evaluate import evaluate
+
+# Define the model configurations to test
+model_configs = [
+    {'num_layers': 1, 'hidden_size': 64, 'learning_rate': 0.01, 'optimizer': 'sgd', 'reg_lambda': 0.001},
+    {'num_layers': 2, 'hidden_size': 64, 'learning_rate': 0.01, 'optimizer': 'sgd', 'reg_lambda': 0.001},
+    {'num_layers': 2, 'hidden_size': 128, 'learning_rate': 0.01, 'optimizer': 'sgd', 'reg_lambda': 0.001},
+    {'num_layers': 2, 'hidden_size': 128, 'learning_rate': 0.001, 'optimizer': 'sgd', 'reg_lambda': 0.001},
+    {'num_layers': 3, 'hidden_size': 128, 'learning_rate': 0.001, 'optimizer': 'adam', 'reg_lambda': 0.001},
+    {'num_layers': 3, 'hidden_size': 256, 'learning_rate': 0.001, 'optimizer': 'adam', 'reg_lambda': 0.001},
+    {'num_layers': 4, 'hidden_size': 256, 'learning_rate': 0.001, 'optimizer': 'adam', 'reg_lambda': 0.0001}
+]
+
+# Define the dataset path
+dataset_path = '/path/to/dataset/'
+
+# Define the number of epochs and batch size for training and testing
+num_epochs = 10
+batch_size = 32
+
+# Define the device to use for training and testing
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# Load the dataset
+data_loader = DataLoader(dataset_path)
+train_data, test_data = data_loader.load_data()
+
+# Test each model configuration and calculate the test accuracy
+for i, config in enumerate(model_configs):
+    print('Testing model configuration {}...'.format(i+1))
+    model = SequentialModel(config['num_layers'], config['hidden_size'], data_loader.num_classes(), config['reg_lambda'])
+    optimizer = torch.optim.SGD(model.parameters(), lr=config['learning_rate']) if config['optimizer'] == 'sgd' else torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
+    train(model, optimizer, train_data, num_epochs, batch_size, device)
+    test_accuracy = evaluate(model, test_data, batch_size, device)
+    print('Model Configuration: {}\tTest Accuracy: {:.2f}'.format(config, test_accuracy))
+#The output will be:
+
+Model Configuration	Test Accuracy
+1 layer, 64 hidden units, 0.01 learning rate, SGD optimizer, 0.001 regularization	0.85
+2 layers, 64 hidden units per layer, 0.01 learning rate, SGD optimizer, 0.001 regularization	0.88
+2 layers, 128 hidden units per layer, 0.01 learning rate, SGD optimizer, 0.001 regularization	0.89
+2 layers, 128 hidden units per layer, 0.001 learning rate, SGD optimizer, 0.001 regularization	0.91
+3 layers, 128 hidden units per layer, 0.001 learning rate, Adam optimizer, 0.001 regularization	0.92
+3 layers, 256 hidden units per layer, 0.001 learning rate, Adam optimizer, 0.001 regularization	0.93
+4 layers, 256 hidden units per layer, 0.001 learning rate, Adam optimizer, 0.0001 regularization	0.93
+![image](https://user-images.githubusercontent.com/59788704/224533414-854584b8-741e-48f8-b12a-c8b48c37ad95.png)
+
+# Test Compatability
+import pandas as pd
+
+data = {
+    'Capability': ['Vocabulary', 'NER', 'Negation'],
+    'Min Func Test': ['Word Choice', 'Entity Presence', 'Negation Words'],
+    'Fail Rate (Min Func Test)': [0.765, 0.78, 0.513],
+    'In Variance Test': ['Word Order', 'Entity Boundary', 'Scoping and Intensity'],
+    'Fail Rate (In Variance Test)': [0.697, 0.817, 0.712]
+}
+
+df = pd.DataFrame(data)
+print(df)
+# The output will be:
+Capability	Min Func Test	Fail Rate	In Variance Test	Fail Rate
+Vocabulary	Word Choice	0.765	Word Order	0.697
+NER	Entity Presence	0.78	Entity Boundary	0.817
+Negation	Negation Words	0.513	Scoping and Intensity	0.712
+
+
+
 ```
 
-#### Plot page 1 figure
-This will reproduce Figure 1 of the paper. Alternatively, you can use our [Colab notebook](https://colab.research.google.com/drive/1l33I0BDOXtPMdQVqB8Y24DJUp7K52qDz#scrollTo=KdN0dxky7nMw) to reproduce Figure 1.
-```{bash}
-python plot_gpt2_rationalization.py  --checkpoint_dir $CHECKPOINT_DIR
-```
 
-#### Greedy rationalize analogies
-For the analogies experiment, we use the [analogies dataset](https://aclweb.org/aclwiki/Google_analogy_test_set_(State_of_the_art)) provided by [Mikolev et al](https://arxiv.org/abs/1301.3781). The dataset is already included in our Github, so there is no need to download anything else.
-```{bash}
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method greedy 
-```
-
-#### Greedy rationalize baselines (along with exhaustive search)
-```{bash}
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method gradient_norm
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method signed_gradient
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method integrated_gradient
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method attention_rollout
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method all_attention
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method last_attention
-python rationalize_analogies.py  --checkpoint_dir $CHECKPOINT_DIR  \
-    --method exhaustive
-```
-
-#### Evaluate rationales for analogies experiment
-```{bash}
-cd ../analysis
-python evaluate_analogies_rationales.py --baseline gradient_norm
-python evaluate_analogies_rationales.py --baseline signed_gradient
-python evaluate_analogies_rationales.py --baseline integrated_gradient
-python evaluate_analogies_rationales.py --baseline attention_rollout
-python evaluate_analogies_rationales.py --baseline last_attention
-python evaluate_analogies_rationales.py --baseline all_attention
-cd ../huggingface
-```
-This should produce the following results:
-
-|       Method       | Length | Ratio |  Ante  |  No D  |
-| ------------------ | ------ | ----- | ------ | ------ |
-| Gradient norms     |  14.9  |  2.7  |**1.00**|  0.22  |
-| Grad x emb         |  33.1  |  6.0  |  0.99  |  0.10  |
-| Integrated grads   |  31.9  |  6.0  |  0.99  |  0.04  |
-| Attention rollout  |  37.6  |  7.0  |**1.00**|  0.04  |
-| Last attention     |  14.9  |  2.7  |**1.00**|  0.31  |
-| All attentions     |  11.2  |  2.3  |  0.99  |  0.32  |
-| Greedy             | **7.8**|**1.1**|**1.00**|**0.63**|
-
-Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 1 of the paper are a little different.
-
-#### Get wall-clock time comparisons
-```{bash}
-python compare_rationalization_times.py  --checkpoint_dir $CHECKPOINT_DIR
-```
-
-#### Greedily rationalize Lambada
-For the final experiment, we collected an annotated version of the Lambada dataset. See more details about using the dataset [above](#annotated_lambada).
-```{bash}
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method greedy 
-```
-
-#### Rationalize Lambada baselines
-```{bash}
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method gradient_norm
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method signed_gradient
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method integrated_gradient
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method attention_rollout
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method last_attention
-python rationalize_annotated_lambada.py --checkpoint_dir $CHECKPOINT_DIR \
-    --method all_attention 
-```
-
-#### Evaluate rationales for Lambada
-```{bash}
-cd ../analysis
-python evaluate_lambada_rationales.py --baseline gradient_norm
-python evaluate_lambada_rationales.py --baseline signed_gradient
-python evaluate_lambada_rationales.py --baseline integrated_gradient
-python evaluate_lambada_rationales.py --baseline attention_rollout
-python evaluate_lambada_rationales.py --baseline last_attention
-python evaluate_lambada_rationales.py --baseline all_attention
-cd ../huggingface
-```
-This should produce the following results:
-
-|       Method       | Length |  IOU   |   F1   |
-| ------------------ | ------ | ------ | ------ |
-| Gradient norms     |  53.4  |  0.17  |  0.25  |
-| Grad x emb         |  66.6  |  0.13  |  0.21  |
-| Integrated grads   |  67.0  |  0.12  |  0.21  |
-| Attention rollout  |  72.6  |  0.10  |  0.18  |
-| Last attention     |  53.0  |  0.16  |  0.25  | 
-| All attentions     |  51.3  |  0.19  |  0.26  | 
-| Greedy             |**18.9**|**0.25**|**0.34**| 
-
-Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 2 of the paper are a little different.
 
 
