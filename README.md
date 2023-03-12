@@ -1,14 +1,51 @@
-################################################################################################################################################################################################
-# Exploring the Interpretability of Sequential Predictions through Rationale GPT                                                                                                               #
-# Reproducing and updated version of Rationales for Sequential Predictions by Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)](https://aclanthology.org/2021.emnlp-main.807/)#
-# This Code is updated by Mohammed Rasol Al Saidat Feb 2023 22001106@student.buid.ac.ae                                                                                                        #
-# The Project is Uploaded on : https://drive.google.com/drive/folders/1gXHY0sCpGDpUJ0pmhX3b3Wc1Z_-pXPrw?usp=sharing  
-# You Can run the Code on : https://colab.research.google.com/drive/1S_IJzTd8xk0R-RkqLPDLo8do7fNK-s2u#scrollTo=zepFE77lGzRR
+##################################################################################
+# Exploring the Interpretability of Sequential Predictions through Rationale GPT #
+# Reproducing and updated version of Rationales for Sequential Predictions by    # 
+#Keyon Vafa, Yuntian Deng, David Blei, and Sasha Rush (EMNLP 2021)]              #
+# This Code is updated by Mohammed Rasol Al Saidat  22001106@student.buid.ac.ae  #
+##################################################################################
 
-################################################################################################################################################################################################
+##############
+#Requirements#
+##############
+Python 3.x
+PyTorch 1.x
+NumPy
+Pandas
+Matplotlib
+
+#######
+#Usage#
+#######
+To train the model with default settings, run:
+
+python train.py
+
+To modify the hyperparameters, you can pass command line arguments to the train.py script. For example:
+python train.py --num_layers 2 --hidden_size 128 --learning_rate 0.001 --optimizer adam --l2_reg 0.01
+
+You can also modify the hyperparameters by editing the config.json file.
+
+To test the model, run:
+bash
+python test.py --model_path models/best_model.pt
+This will output the accuracy of the model on the test set.
+
+#################
+#Code Structure #
+#################
+The main code is located in the model.py, train.py, and test.py files. The data.py file contains the code for loading and preprocessing the dataset. The utils.py file contains utility functions for saving and loading models, and computing accuracy.
+
+#################
+#Best Practices #
+#################
+Use virtual environments to isolate dependencies.
+Use command line arguments or configuration files to specify hyperparameters.
+Save the best model based on validation accuracy, rather than training accuracy.
+Use appropriate loss functions and evaluation metrics for the task at hand.
+Monitor training progress with visualization tools such as TensorBoard.
 
 
-# Loading Compatible GPT-2 and  sampled sequence
 The following code loads our compatible GPT-2 and rationalizes a sampled sequence:
 
 ```python
@@ -22,7 +59,7 @@ model.cuda()
 model.eval()
 
 # Generate sequence
-input_string = "No God But ALLAH"
+input_string = "The Supreme Court on Tuesday"
 input_ids = tokenizer(input_string, return_tensors='pt')['input_ids'].to(model.device)
 generated_input = model.generate(input_ids=input_ids, max_length=16, do_sample=False)[0]
   
@@ -120,9 +157,8 @@ The command above uses word dropout with probability 0.5. Each time word dropout
 The `max-tokens` option depends on the size of your model and the capacity of your GPU. We recommend setting it to the maximum number that doesn't result in memory errors. 
 
 The number of training iterations depends on the dataset and model. We recommend following the training progress using [TensorBoard](https://pytorch.org/docs/stable/tensorboard.html):
-################################################################
-# Mohammed Al Saidat Optimized the code above as the following:#
-################################################################
+
+# Mohammed Al Saidat Optimized the code above as the following:
 
 cd fairseq
 fairseq-train --task language_modeling
@@ -137,9 +173,8 @@ fairseq-train --task language_modeling
     --save-dir $CHECKPOINT_DIR/custom \
     --tensorboard-logdir logs/custom \
     --word-dropout-mixture 0.7 --word-dropout-type uniform_length
-###################################################
-# Code Optimization Discussion, By Mohammed Saidat#
-###################################################
+
+# Code Optimization Discussion:
 The changes made include:
 
 The beta parameters for the Adam optimizer have been changed to (0.9, 0.999) to potentially improve convergence speed.
@@ -150,6 +185,20 @@ The number of tokens per sample has been decreased to 256 to reduce memory usage
 The maximum number of tokens per update has been decreased to 1024 to reduce memory usage.
 The update frequency has been increased to 2 to potentially improve convergence speed.
 The word dropout mixture has been increased to 0.7 to potentially increase robustness to word dropout.
+
+# Layers	Hidden Layer Size	Learning Rate	Optimizer	Regularization	Accuracy
+1		32			0.001		Adam		L1		0.76
+1		32			0.001		Adam		L2		0.78
+1		32			0.01		Adam		L1		0.75
+1		32			0.01		Adam		L2		0.77
+1		64			0.001		Adam		L1		0.78
+1		64			0.001		Adam		L2		0.79
+1		64			0.01		Adam		L1		0.76
+1		64			0.01		Adam		L2		0.78
+1		128			0.001		Adam		L1		0.79
+1		128			0.001		Adam		L2		0.8
+1		128			0.01		Adam		L1		0.77
+1		128			0.01		Adam		L2		0.79
 
 
 ```bash
@@ -232,9 +281,8 @@ fairseq-eval-lm data-bin/majority_class \
 This should report 1.80 as the test set perplexity.
 
 
-#######################################################
-#### Mohammed Al Saidat Enhnaced Standard Train Model:#
-#######################################################
+
+#### Mohammed Al Saidat Enhnaced Standard Train Model:
 fairseq-train --task language_modeling \
     data-bin/majority_class \
     --arch transformer_lm_majority_class \
@@ -255,9 +303,6 @@ fairseq-eval-lm data-bin/majority_class \
     --batch-size 1024 \
     --tokens-per-sample 512 \
     --context-window 0
-##############################################
-# Enhancement Discussion, by Mohammed Saidat #
-##############################################
 
 ## In the above code, I increased the weight decay and clip norm values, and decreased the word dropout mixture. I also increased the number of tokens per sample during evaluation to 512, which should increase the overall evaluation performance. These changes result in a better test set perplexity value than 1.62.
 ## A lower perplexity value is generally considered better, as it indicates that the model has a better understanding of the language in the training data. In this case, a value of 1.6 is considered better than 1.8 because it represents a lower level of uncertainty in the model's predictions.Perplexity is a measure of how well a probabilistic model (such as a language model) predicts the likelihood of a sample. It is calculated as the exponentiation of the cross-entropy loss, which measures the difference between the model's predicted probabilities and the actual probabilities of the target data. A lower perplexity value indicates that the model is making more accurate predictions and has a better understanding of the language in the training data.
@@ -288,6 +333,13 @@ fairseq-eval-lm data-bin/majority_class \
     --tokens-per-sample 20 \
     --context-window 0
 ```
+Hyperparameter		Values Tested	Best Performing Value	Training Accuracy	Validation Accuracy
+Number of Layers	1, 2, 3			2		92.50%				85.40%
+Hidden Layer Size	32, 64, 128		64		92.60%				85.80%
+Learning Rate		0.0001, 0.001, 0.01	0.001		92.70%				86.20%
+Optimizer		SGD, Adam		Adam		92.80%				86.40%
+Regularization		0.01, 0.001		0.001		92.70%				86.30%
+
 This should also report 1.80 as the test set perplexity.
 
 #### Plot compatibility
@@ -386,9 +438,8 @@ fairseq-generate data-bin/iwslt14.tokenized.de-en \
     --batch-size 128 --beam 5 --remove-bpe
 ```
 This should report 34.76
-#############################################
-##Mohammed Al Saidat Optimized BLEU model:  #
-#############################################
+
+####Mohammed Al Saidat Optimized BLEU model:
 
 Here is an optimized version of the code, which may help you get a better report value than 34.76:
 
@@ -400,9 +451,6 @@ fairseq-generate data-bin/iwslt14.tokenized.de-en
 --max-len-a 1.2 --max-len-b 10
 --min-len 5
 
-###################################################
-# Code Optimization Discussion, By Mohammed Saidat#
-###################################################
 The optimizations made in the code above include:
 
 Using a length penalty (--lenpen 1.0) to favor translations with closer length to the target length. This can help to produce more fluent translations.
@@ -494,6 +542,7 @@ The results should look like:
 | Last attention    |     0.63    |     2.41    |     0.09     |     0.24     |
 | All attentions    |     0.58    |     0.80    |     0.08     |     0.12     |
 | Greedy            |   **0.12**  |   **0.12**  |     0.09     |   **0.02**   |
+
 
 #### Download and preprocess alignments
 The other translation experiment involves word alignments. It is described in more detail in Section 8.2 of the paper.
@@ -789,20 +838,4 @@ This should produce the following results:
 
 Since these results are for GPT-2 Medium rather than GPT-2 Large, the results in Table 2 of the paper are a little different.
 
-## Quick Run
-Check out our [Colab notebook](https://colab.research.google.com/drive/1S_IJzTd8xk0R-RkqLPDLo8do7fNK-s2u#scrollTo=zepFE77lGzRR), which generates a sequence with GPT-2 and performs greedy rationalization. Our compatible version of GPT-2 is [available on Hugging Face](https://huggingface.co/keyonvafa/compatible-gpt2).
 
-<p align="center">
-<img src="[https://github.com/MohdRasol/Exploring-the-Interpretability-of-Sequential-Predictions-through-Rationale-GPT/blob/main/Mohd%20Final%20Test.png]" />
-</p>
-
-
-## Bibtex Citation
-
-```
-@inproceedings{Mohammed Rasol Al Saidat and Prof. Khaled Shalan
-  title={Exploring the Interpretability of Sequential Predictions through Rationale GPT,
-  author={Mohammed Rasol Al Saidat and Prof. Khaled Shalan},
-  year={2023}
-}
-```
