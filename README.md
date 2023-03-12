@@ -792,6 +792,7 @@ Capability	Min Func Test	Fail Rate	In Variance Test	Fail Rate
 Vocabulary	Word Choice	0.765	Word Order	0.697
 NER	Entity Presence	0.78	Entity Boundary	0.817
 Negation	Negation Words	0.513	Scoping and Intensity	0.712
+![image](https://user-images.githubusercontent.com/59788704/224533469-cb954eec-f26a-49c8-8838-7e3c19b0a6e1.png)
 
 
 
